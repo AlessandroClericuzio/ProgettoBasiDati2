@@ -18,10 +18,7 @@ export default function RootLayout({
         <Header />
         <CountryProvider initialCountryId={10257} initialCountryName="Italia">
           <div className="flex flex-1 overflow-auto">
-            {/* Sidebar Paesi */}
             <Sidebar />
-
-            {/* Main content area */}
             <main className="flex-1 p-6 overflow-auto">{children}</main>
           </div>
         </CountryProvider>
