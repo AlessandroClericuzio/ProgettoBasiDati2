@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import LeagueAccordion from "./components/LeagueAccortion";
+import LeagueAccordion from "./components/LeagueAccordion";
 import AddLeagueModal from "./components/AddLeagueModal";
 import EditLeagueModal from "./components/EditLeagueModal";
 import LeagueDetailsModal from "./components/LeagueDetailModal";
