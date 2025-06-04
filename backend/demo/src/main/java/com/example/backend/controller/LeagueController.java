@@ -52,15 +52,17 @@ public class LeagueController {
         @PathVariable String id,
         @RequestBody League updatedLeague
     ) {
-        Optional<League> existing = leagueService.getLeagueById(id);
-        if (existing.isPresent()) {
-            updatedLeague.setId(id);
-            League saved = leagueService.saveLeague(updatedLeague);
-            return ResponseEntity.ok(saved);
+        boolean updated = leagueService.updateLeague(id, updatedLeague);
+        if (updated) {
+            // Ritorniamo il documento aggiornato
+            Optional<League> league = leagueService.getLeagueById(id);
+            return league.map(ResponseEntity::ok)
+                        .orElseGet(() -> ResponseEntity.notFound().build());
         } else {
             return ResponseEntity.notFound().build();
         }
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLeague(@PathVariable String id) {

@@ -7,12 +7,10 @@ Un'applicazione web per la gestione e la visualizzazione dei dati relativi a cam
 
 - **Frontend:** Next.js (React) + Tailwind CSS
 - **Backend:** Spring Boot (Java)
-- **Database:** PostgreSQL
+- **Database:** MongoDB (assicurarsi di avere il database caricato con i dati necessari)
 - **Librerie principali:**
   - Axios
-  - Prisma (se usato)
   - React Context API
-  - Shadcn/UI per UI components (opzionale)
 
 ---
 
@@ -22,13 +20,33 @@ Un'applicazione web per la gestione e la visualizzazione dei dati relativi a cam
 
 - Node.js (versione consigliata: ≥ 18)
 - Java JDK ≥ 17
-- PostgreSQL
+- MongoDB
+- MongoDBCompass
 - Maven o Gradle
 - Git
 
 ---
 
-### ▶️ 1. Clona il repository
+## ⚙️ Configurazione database MongoDB
+
+Prima di avviare il backend, assicurarsi di:
+
+1. Avere MongoDB in esecuzione localmente o in remoto.
+2. Aver importato il dataset richiesto nel database MongoDB (es. tramite `mongoimport` o script di caricamento dati).
+
+---
+
+## 📚 Fonte del dataset
+
+I dati sportivi utilizzati nel progetto sono estratti dal dataset pubblico disponibile su Kaggle:
+
+[https://www.kaggle.com/datasets/hugomathien/soccer/data]
+
+---
+
+# ⚽ Procedimenti
+
+## ▶️ 1. Clona il repository
 
 ```bash
 git clone https://github.com/AlessandroClericuzio/ProgettoBasiDati2.git
@@ -87,3 +105,4 @@ Provare a ricaricare la pagina (refresh).
 
 ```
 
+```

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -87,5 +88,18 @@ public class LeagueServiceImpl implements LeagueService {
         Query mongoQuery = new Query(Criteria.where("name").regex(".*" + query + ".*", "i"));
         return mongoTemplate.find(mongoQuery, League.class);
     }
+
+    @Override
+    public boolean updateLeague(String id, League updatedLeague) {
+        Query query = new Query(Criteria.where("_id").is(id));
+        Update update = new Update()
+            .set("leagueId", updatedLeague.getLeagueId())
+            .set("name", updatedLeague.getName())
+            .set("country_id", updatedLeague.getCountryId());
+        var result = mongoTemplate.updateFirst(query, update, League.class);
+        return result.getModifiedCount() > 0;
+    }
+
+
 
 }

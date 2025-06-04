@@ -15,5 +15,6 @@ public interface LeagueService {
     void deleteLeague(String id);
     List<League> findByCountryId(int countryId);
     List<League> searchLeaguesByName(String query);
+    boolean updateLeague(String id, League updatedLeague);
 
 }
