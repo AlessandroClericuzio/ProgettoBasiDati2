@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+````markdown
+# ⚽ Progetto Basi di Dati 2 – Campionati di Calcio
 
-## Getting Started
+Un'applicazione web per la gestione e la visualizzazione dei dati relativi a campionati di calcio, con backend in Java Spring Boot e frontend in Next.js + Tailwind CSS.
 
-First, run the development server:
+## 🧱 Stack Tecnologico
+
+- **Frontend:** Next.js (React) + Tailwind CSS
+- **Backend:** Spring Boot (Java)
+- **Database:** PostgreSQL
+- **Librerie principali:**
+  - Axios
+  - Prisma (se usato)
+  - React Context API
+  - Shadcn/UI per UI components (opzionale)
+
+---
+
+## 🚀 Setup del Progetto
+
+### 📦 Prerequisiti
+
+- Node.js (versione consigliata: ≥ 18)
+- Java JDK ≥ 17
+- PostgreSQL
+- Maven o Gradle
+- Git
+
+---
+
+### ▶️ 1. Clona il repository
+
+```bash
+git clone https://github.com/AlessandroClericuzio/ProgettoBasiDati2.git
+cd ProgettoBasiDati2
+```
+````
+
+---
+
+## ⚙️ 2. Configurazione backend
+
+2.1. Accedi alla directory del backend:
+
+```bash
+cd backend/demo/src/main/java/com/example
+```
+
+2.2. Avvia il file `BackendApplication.java` (es. tramite IDE o comando Maven/Gradle).
+
+---
+
+## ⚙️ 3. Configurazione frontend
+
+3.1. Nel terminale del frontend, installa le dipendenze:
+
+```bash
+npm install
+```
+
+3.2. Avvia il frontend:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+✅ Il frontend sarà attivo su: [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🧭 Funzionalità disponibili
 
-## Learn More
+- ✅ Visualizzazione leghe per paese
+- ✅ Filtraggio partite per data
+- ✅ Aggiunta nuova lega
+- ✅ Dettagli della lega in modale
+- ✅ Modifica ed eliminazione lega
+- ✅ Visualizzazione partite con squadre
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 🔽 In caso di non caricamento dei paesi al primo avvio
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Provare a ricaricare la pagina (refresh).
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

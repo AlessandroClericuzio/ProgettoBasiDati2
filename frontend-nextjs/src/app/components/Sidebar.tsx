@@ -9,23 +9,22 @@ export default function Sidebar() {
   const { selectedCountryId, setSelectedCountry } = useCountry();
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(false);
 
   const fetchCountries = () => {
-    console.log("Fetch start");
     setLoading(true);
-    setError(null);
+    setError(false);
+
     axios
       .get("http://localhost:8080/api/countries")
       .then((res) => {
-        console.log("Fetch success", res.data);
         setCountries(res.data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Fetch error", err);
-        setError("Errore nel caricamento dei paesi");
+        console.error("Errore fetch countries:", err);
         setLoading(false);
+        setError(true);
       });
   };
 
@@ -33,26 +32,18 @@ export default function Sidebar() {
     fetchCountries();
   }, []);
 
-  console.log("Render Sidebar", { loading, error, countries });
-
   if (loading) {
     return (
-      <aside className="w-64 p-4">
+      <aside className="w-64 p-4 bg-gray-100">
         <p>Caricamento paesi...</p>
-      </aside>
-    );
-  }
-
-  if (error) {
-    return (
-      <aside className="w-64 p-4 bg-red-100 text-red-700">
-        <p>{error}</p>
-        <button
-          onClick={fetchCountries}
-          className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-        >
-          Riprova
-        </button>
+        {error && (
+          <button
+            onClick={fetchCountries}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Riprova
+          </button>
+        )}
       </aside>
     );
   }
