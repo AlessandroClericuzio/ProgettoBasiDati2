@@ -1,6 +1,7 @@
 package com.example.backend.repository;
 
 import com.example.backend.dto.MatchWithDetailsDTO;
+import com.example.backend.dto.StandingDTO;
 import com.example.backend.model.League;
 import com.example.backend.model.Match;
 import com.example.backend.model.Team;
@@ -11,7 +12,12 @@ import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 
@@ -24,9 +30,9 @@ public class MatchRepositoryCustomImpl implements MatchRepositoryCustom {
     @Override
     public List<MatchWithDetailsDTO> findMatchesWithDetails() {
         Aggregation aggregation = newAggregation(
-            lookup("league", "league_id", "id", "league"),
-            lookup("team", "home_team_api_id", "team_api_id", "homeTeam"),
-            lookup("team", "away_team_api_id", "team_api_id", "awayTeam"),
+            lookup("leagues", "league_id", "id", "league"),
+            lookup("teams", "home_team_api_id", "team_api_id", "homeTeam"),
+            lookup("teams", "away_team_api_id", "team_api_id", "awayTeam"),
             unwind("league", true),
             unwind("homeTeam", true),
             unwind("awayTeam", true)
@@ -87,16 +93,16 @@ public class MatchRepositoryCustomImpl implements MatchRepositoryCustom {
         // 3) Aggregazione con lookup su league e team
         Aggregation agg = newAggregation(
             match(criteria),
-            lookup("league", "league_id", "id", "league"),
-            lookup("team",   "home_team_api_id", "team_api_id", "homeTeam"),
-            lookup("team",   "away_team_api_id", "team_api_id", "awayTeam"),
+            lookup("leagues", "league_id", "id", "league"),
+            lookup("teams", "home_team_api_id", "team_api_id", "homeTeam"),
+            lookup("teams", "away_team_api_id", "team_api_id", "awayTeam"),
             unwind("league", true),
             unwind("homeTeam", true),
             unwind("awayTeam", true)
         );
 
         // 4) Esegui e mappa in DTO
-        AggregationResults<Document> results = mongoTemplate.aggregate(agg, "match", Document.class);
+        AggregationResults<Document> results = mongoTemplate.aggregate(agg, "matches", Document.class);
         return results.getMappedResults().stream().map(doc -> {
             MatchWithDetailsDTO dto = new MatchWithDetailsDTO();
             dto.setMatch(mongoTemplate.getConverter().read(Match.class, doc));
@@ -114,7 +120,8 @@ public class MatchRepositoryCustomImpl implements MatchRepositoryCustom {
         }).toList();
     }
 
-  @Override
+  
+    @Override
     public List<String> findAllAvailableDates() {
         Query query = new Query();
         query.fields().include("date");
@@ -126,6 +133,7 @@ public class MatchRepositoryCustomImpl implements MatchRepositoryCustom {
                 .sorted()
                 .toList();
     }
+
 
 
     @Override
@@ -149,15 +157,15 @@ public class MatchRepositoryCustomImpl implements MatchRepositoryCustom {
 
         Aggregation aggregation = Aggregation.newAggregation(
             match(matchCriteria),
-            lookup("league", "league_id", "id", "league"),
-            lookup("team", "home_team_api_id", "team_api_id", "homeTeam"),
-            lookup("team", "away_team_api_id", "team_api_id", "awayTeam"),
+            lookup("leagues", "league_id", "id", "league"),
+            lookup("teams", "home_team_api_id", "team_api_id", "homeTeam"),
+            lookup("teams", "away_team_api_id", "team_api_id", "awayTeam"),
             unwind("league", true),
             unwind("homeTeam", true),
             unwind("awayTeam", true)
         );
 
-        AggregationResults<Document> results = mongoTemplate.aggregate(aggregation, "match", Document.class);
+        AggregationResults<Document> results = mongoTemplate.aggregate(aggregation, "matches", Document.class);
 
         results.getMappedResults().forEach(doc -> {
             System.out.println("Document: " + doc);
@@ -194,28 +202,160 @@ public class MatchRepositoryCustomImpl implements MatchRepositoryCustom {
         // Costruisci filtro solo per data
         Criteria criteria = Criteria.where("date").regex("^" + date);
 
-        Aggregation agg = newAggregation(
-            match(criteria),
-            lookup("league", "league_id", "id", "league"),
-            lookup("team",   "home_team_api_id", "team_api_id", "homeTeam"),
-            lookup("team",   "away_team_api_id", "team_api_id", "awayTeam"),
-            unwind("league", true),
-            unwind("homeTeam", true),
-            unwind("awayTeam", true)
-        );
+       Aggregation agg = newAggregation(
+        match(criteria),
+        lookup("leagues", "league_id", "id", "league"),
+        lookup("teams", "home_team_api_id", "team_api_id", "homeTeam"),
+        lookup("teams", "away_team_api_id", "team_api_id", "awayTeam"),
+        unwind("league", true),
+        unwind("homeTeam", true),
+        unwind("awayTeam", true)
+    );  
 
-        AggregationResults<Document> results = mongoTemplate.aggregate(agg, "match", Document.class);
-        return results.getMappedResults().stream().map(doc -> {
-            MatchWithDetailsDTO dto = new MatchWithDetailsDTO();
-            dto.setMatch(mongoTemplate.getConverter().read(Match.class, doc));
-            Document leagueDoc = (Document) doc.get("league");
-            if (leagueDoc != null) dto.setLeague(mongoTemplate.getConverter().read(League.class, leagueDoc));
-            Document homeDoc   = (Document) doc.get("homeTeam");
-            if (homeDoc   != null) dto.setHomeTeam(mongoTemplate.getConverter().read(Team.class,   homeDoc));
-            Document awayDoc   = (Document) doc.get("awayTeam");
-            if (awayDoc   != null) dto.setAwayTeam(mongoTemplate.getConverter().read(Team.class,   awayDoc));
-            return dto;
-        }).toList();
+        AggregationResults<Document> results = mongoTemplate.aggregate(agg, "matches", Document.class);
+       return results.getMappedResults().stream().map(doc -> {
+        MatchWithDetailsDTO dto = new MatchWithDetailsDTO();
+
+        // Estrai solo il campo "match" puro dal document
+        Document matchDoc = new Document(doc);
+        matchDoc.remove("league");
+        matchDoc.remove("homeTeam");
+        matchDoc.remove("awayTeam");
+        dto.setMatch(mongoTemplate.getConverter().read(Match.class, matchDoc));
+
+        // Estrarre e convertire i sotto-documenti
+        Document leagueDoc = (Document) doc.get("league");
+        if (leagueDoc != null) {
+            dto.setLeague(mongoTemplate.getConverter().read(League.class, leagueDoc));
+        }
+
+        Document homeDoc = (Document) doc.get("homeTeam");
+        if (homeDoc != null) {
+            dto.setHomeTeam(mongoTemplate.getConverter().read(Team.class, homeDoc));
+        }
+
+        Document awayDoc = (Document) doc.get("awayTeam");
+        if (awayDoc != null) {
+            dto.setAwayTeam(mongoTemplate.getConverter().read(Team.class, awayDoc));
+        }
+
+        return dto;
+    }).toList();
+
     }
 
+    @Override
+    public List<StandingDTO> calculateStandings(String season, int leagueId) {
+        // CASA
+        MatchOperation homeMatch = Aggregation.match(
+                Criteria.where("season").is(season).and("league_id").is(leagueId)
+        );
+        ProjectionOperation homeProject = Aggregation.project()
+                .and("home_team_api_id").as("team")
+                .and("league_id").as("league_id")
+                .and("home_team_goal").as("goalsFor")
+                .and("away_team_goal").as("goalsAgainst")
+                .andExpression("cond(home_team_goal > away_team_goal, 3, cond(home_team_goal == away_team_goal, 1, 0))").as("points");
+
+        Aggregation homeAgg = Aggregation.newAggregation(
+                homeMatch,
+                homeProject,
+                Aggregation.group("league_id", "team")
+                        .sum("points").as("points")
+                        .sum("goalsFor").as("goalsFor")
+                        .sum("goalsAgainst").as("goalsAgainst")
+                        .count().as("gamesPlayed")
+        );
+        List<Document> homeResults = mongoTemplate.aggregate(homeAgg, "matches", Document.class).getMappedResults();
+
+        // TRASFERTA
+        MatchOperation awayMatch = Aggregation.match(
+                Criteria.where("season").is(season).and("league_id").is(leagueId)
+        );
+        ProjectionOperation awayProject = Aggregation.project()
+                .and("away_team_api_id").as("team")
+                .and("league_id").as("league_id")
+                .and("away_team_goal").as("goalsFor")
+                .and("home_team_goal").as("goalsAgainst")
+                .andExpression("cond(away_team_goal > home_team_goal, 3, cond(away_team_goal == home_team_goal, 1, 0))").as("points");
+
+        Aggregation awayAgg = Aggregation.newAggregation(
+                awayMatch,
+                awayProject,
+                Aggregation.group("league_id", "team")
+                        .sum("points").as("points")
+                        .sum("goalsFor").as("goalsFor")
+                        .sum("goalsAgainst").as("goalsAgainst")
+                        .count().as("gamesPlayed")
+        );
+        List<Document> awayResults = mongoTemplate.aggregate(awayAgg, "matches", Document.class).getMappedResults();
+
+        // MERGE RISULTATI
+        Map<Integer, Document> standingsMap = new HashMap<>();
+
+        for (Document doc : homeResults) {
+            Document id = (Document) doc.get("_id");
+            Integer teamId = id.getInteger("team");
+            standingsMap.put(teamId, new Document("league_id", leagueId)
+                    .append("team", teamId)
+                    .append("points", doc.getInteger("points"))
+                    .append("goalsFor", doc.getInteger("goalsFor"))
+                    .append("goalsAgainst", doc.getInteger("goalsAgainst"))
+                    .append("gamesPlayed", doc.getInteger("gamesPlayed"))
+            );
+        }
+
+        for (Document doc : awayResults) {
+            Document id = (Document) doc.get("_id");
+            Integer teamId = id.getInteger("team");
+            standingsMap.merge(teamId, new Document("league_id", leagueId)
+                            .append("team", teamId)
+                            .append("points", doc.getInteger("points"))
+                            .append("goalsFor", doc.getInteger("goalsFor"))
+                            .append("goalsAgainst", doc.getInteger("goalsAgainst"))
+                            .append("gamesPlayed", doc.getInteger("gamesPlayed")),
+                    (existing, newDoc) -> {
+                        existing.put("points", existing.getInteger("points") + newDoc.getInteger("points"));
+                        existing.put("goalsFor", existing.getInteger("goalsFor") + newDoc.getInteger("goalsFor"));
+                        existing.put("goalsAgainst", existing.getInteger("goalsAgainst") + newDoc.getInteger("goalsAgainst"));
+                        existing.put("gamesPlayed", existing.getInteger("gamesPlayed") + newDoc.getInteger("gamesPlayed"));
+                        return existing;
+                    });
+        }
+
+        // FETCH nomi delle squadre
+        Map<Integer, String> teamNames = mongoTemplate.findAll(Document.class, "teams").stream()
+                .collect(Collectors.toMap(doc -> doc.getInteger("team_api_id"), doc -> doc.getString("team_long_name")));
+
+        // OUTPUT FINALE
+        Stream<StandingDTO> standingsStream = standingsMap.values().stream()
+        .map(doc -> {
+            int goalsFor = doc.getInteger("goalsFor") != null ? doc.getInteger("goalsFor") : 0;
+            int goalsAgainst = doc.getInteger("goalsAgainst") != null ? doc.getInteger("goalsAgainst") : 0;
+            int points = doc.getInteger("points") != null ? doc.getInteger("points") : 0;
+            String teamName = teamNames.getOrDefault(doc.getInteger("team"), "Sconosciuta");
+
+            return new StandingDTO(
+                teamName,
+                goalsFor,
+                goalsAgainst,
+                goalsFor - goalsAgainst,
+                points
+            );
+        });
+
+    return standingsStream
+        .sorted(Comparator.comparingInt(StandingDTO::getPoints).reversed())
+        .collect(Collectors.toList());
+
+
+        }
+
+    @Override
+    public List<String> findDistinctSeasons() {
+        return mongoTemplate.query(Match.class)
+                .distinct("season")
+                .as(String.class)
+                .all();
+    }
 }

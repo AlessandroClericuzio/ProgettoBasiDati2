@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 @Data
-@Document(collection = "country")
+@Document(collection = "countries")
 public class Country {
     @Id
     private String id;

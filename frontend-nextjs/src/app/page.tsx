@@ -25,9 +25,10 @@ export default function HomePage() {
   const { selectedCountryId } = useCountry();
   const [matches, setMatches] = useState<MatchWithDetails[]>([]);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
-  const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().slice(0, 10)
-  );
+
+  // Inizializzo selectedDate vuoto
+  const [selectedDate, setSelectedDate] = useState<string>("");
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,11 +41,25 @@ export default function HomePage() {
   const [editLeague, setEditLeague] = useState<League | null>(null);
   const [isEditLeagueOpen, setIsEditLeagueOpen] = useState(false);
 
+  // Carico availableDates e imposto selectedDate al primo valore disponibile o a oggi
   useEffect(() => {
     axios
       .get<string[]>("http://localhost:8080/api/matches/available-dates")
-      .then((res) => setAvailableDates(res.data))
-      .catch(() => {});
+      .then((res) => {
+        setAvailableDates(res.data);
+
+        if (res.data.length > 0 && !selectedDate) {
+          // Prendi solo la data senza orario
+          const firstDate = res.data[0].split(" ")[0]; // oppure res.data[0].slice(0, 10)
+          setSelectedDate(firstDate);
+        } else if (res.data.length === 0 && !selectedDate) {
+          setSelectedDate(new Date().toISOString().slice(0, 10));
+        }
+      })
+      .catch(() => {
+        if (!selectedDate)
+          setSelectedDate(new Date().toISOString().slice(0, 10));
+      });
   }, []);
 
   const fetchLeagues = useCallback(
@@ -90,12 +105,19 @@ export default function HomePage() {
           { params: { date: selectedDate } }
         );
         matchData = res.data;
+        console.log(
+          "fetchMatches chiamata all con selectedDate =",
+          selectedDate
+        );
+        console.log("Risposta backend (by-date):", matchData);
       } else {
         const res = await axios.get<MatchWithDetails[]>(
           "http://localhost:8080/api/matches/by-country-and-date",
           { params: { countryId: selectedCountryId, date: selectedDate } }
         );
         matchData = res.data;
+        console.log("fetchMatches chiamata con selectedDate =", selectedDate);
+        console.log("Risposta backend (by-date):", matchData);
       }
       setMatches(matchData);
     } catch {
@@ -105,9 +127,12 @@ export default function HomePage() {
     }
   }, [selectedCountryId, selectedDate]);
 
+  // Chiamo fetch solo se selectedDate è valorizzato
   useEffect(() => {
-    fetchLeagues(searchLeagueName);
-    fetchMatches();
+    if (selectedDate) {
+      fetchLeagues(searchLeagueName);
+      fetchMatches();
+    }
   }, [selectedCountryId, selectedDate]);
 
   const debouncedSearch = useCallback(
@@ -214,21 +239,32 @@ export default function HomePage() {
 
       <div className="space-y-4 overflow-y-auto max-h-[600px] pr-2">
         {leagues.length > 0 ? (
-          leagues.map((league) => {
-            const matchesOfThisLeague = matches.filter(
-              (m) => m.league.leagueId === league.leagueId
-            );
+          leagues
+            .filter((league) => {
+              if (selectedCountryId === 0) {
+                // Se siamo in "All", mostra solo leghe con almeno un match
+                return matches.some(
+                  (m) => m.league?.leagueId === league.leagueId
+                );
+              }
+              // Se siamo in un paese specifico, mostra tutte le leghe
+              return true;
+            })
+            .map((league) => {
+              const matchesOfThisLeague = matches.filter(
+                (m) => m.league?.leagueId === league.leagueId
+              );
 
-            return (
-              <div key={league.leagueId} className="mb-8">
-                <LeagueAccordion
-                  league={league}
-                  matches={matchesOfThisLeague}
-                  onLeagueClick={() => openLeagueDetails(league.leagueId)}
-                />
-              </div>
-            );
-          })
+              return (
+                <div key={league.leagueId} className="mb-8">
+                  <LeagueAccordion
+                    league={league}
+                    matches={matchesOfThisLeague}
+                    onLeagueClick={() => openLeagueDetails(league.leagueId)}
+                  />
+                </div>
+              );
+            })
         ) : (
           <p>Nessuna lega disponibile per questa data.</p>
         )}

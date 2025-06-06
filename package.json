@@ -5,6 +5,7 @@
     "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
     "axios": "^1.9.0",
+    "mongodb": "^6.17.0",
     "react-router-dom": "^7.6.0",
     "typescript": "^5.8.3"
   },
