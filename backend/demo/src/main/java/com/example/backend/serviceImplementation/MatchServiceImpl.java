@@ -3,10 +3,10 @@
 package com.example.backend.serviceImplementation;
 
 import com.example.backend.dto.MatchWithDetailsDTO;
+import com.example.backend.exception.MatchAlreadyExistsException;
 import com.example.backend.model.Match;
 import com.example.backend.repository.MatchRepositoryCustom;
 import com.example.backend.serviceInterface.MatchService;
-import com.example.exception.MatchAlreadyExistsException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;

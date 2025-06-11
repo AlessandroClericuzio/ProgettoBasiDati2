@@ -21,6 +21,7 @@ public class MatchRepositoryCustomImpl implements MatchRepositoryCustom {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    // join tra legue e match
     @Override
     public List<MatchWithDetailsDTO> findMatchesWithDetails() {
         Aggregation aggregation = newAggregation(

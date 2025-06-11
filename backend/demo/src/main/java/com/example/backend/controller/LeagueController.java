@@ -2,9 +2,9 @@
 
 package com.example.backend.controller;
 
+import com.example.backend.exception.LeagueAlreadyExistsException;
 import com.example.backend.model.League;
 import com.example.backend.serviceInterface.LeagueService;
-import com.example.exception.LeagueAlreadyExistsException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
