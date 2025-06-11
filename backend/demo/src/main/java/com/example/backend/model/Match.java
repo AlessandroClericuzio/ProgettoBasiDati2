@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.index.CompoundIndexes;
 
 import lombok.Data;
 
-@Document(collection = "match")
+@Document(collection = "matches")
 @CompoundIndexes({
     @CompoundIndex(
         name = "unique_match_per_combo",

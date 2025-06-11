@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Document(collection = "team")
+@Document(collection = "teams")
 @Getter
 @Setter
 @Data
