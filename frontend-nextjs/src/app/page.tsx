@@ -204,81 +204,220 @@ export default function HomePage() {
   };
 
   return (
-    <>
-      <div className="flex items-center justify-between mb-4 space-x-4">
-        <input
-          type="text"
-          placeholder="Cerca lega..."
-          value={searchLeagueName}
-          onChange={onSearchChange}
-          className="p-2 border rounded flex-grow max-w-xs"
-        />
-
-        <div className="flex items-center space-x-2">
-          <label htmlFor="match-date" className="text-sm">
-            Data:
-          </label>
-          <input
-            type="date"
-            id="match-date"
-            className="p-2 border rounded"
-            value={selectedDate}
-            onChange={handleDateChange}
-            list="available-dates"
-          />
-          <datalist id="available-dates">
-            {availableDates.map((date) => (
-              <option key={date} value={date} />
-            ))}
-          </datalist>
-        </div>
-      </div>
-
-      {isLoading && <p>Caricamento in corso...</p>}
-      {error && <p className="text-red-600">{error}</p>}
-
-      <div className="space-y-4 overflow-y-auto max-h-[600px] pr-2">
-        {leagues.length > 0 ? (
-          leagues
-            .filter((league) => {
-              if (selectedCountryId === 0) {
-                // Se siamo in "All", mostra solo leghe con almeno un match
-                return matches.some(
-                  (m) => m.league?.leagueId === league.leagueId
-                );
-              }
-              // Se siamo in un paese specifico, mostra tutte le leghe
-              return true;
-            })
-            .map((league) => {
-              const matchesOfThisLeague = matches.filter(
-                (m) => m.league?.leagueId === league.leagueId
-              );
-
-              return (
-                <div key={league.leagueId} className="mb-8">
-                  <LeagueAccordion
-                    league={league}
-                    matches={matchesOfThisLeague}
-                    onLeagueClick={() => openLeagueDetails(league.leagueId)}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header con controlli */}
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 mb-8">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            {/* Search Input */}
+            <div className="relative flex-grow max-w-md">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg
+                  className="h-5 w-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
-                </div>
-              );
-            })
-        ) : (
-          <p>Nessuna lega disponibile per questa data.</p>
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Cerca lega..."
+                value={searchLeagueName}
+                onChange={onSearchChange}
+                className="w-full pl-10 pr-4 py-3 bg-white/80 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 placeholder-gray-500"
+              />
+            </div>
+
+            {/* Date Input */}
+            <div className="flex items-center space-x-3 bg-white/80 px-4 py-3 rounded-xl border border-gray-200 shadow-sm">
+              <div className="flex items-center space-x-2 text-gray-700">
+                <svg
+                  className="h-5 w-5 text-indigo-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                <label htmlFor="match-date" className="text-sm font-medium">
+                  Data:
+                </label>
+              </div>
+              <input
+                type="date"
+                id="match-date"
+                className="bg-transparent border-none outline-none focus:ring-0 text-gray-800 font-medium"
+                value={selectedDate}
+                onChange={handleDateChange}
+                list="available-dates"
+              />
+              <datalist id="available-dates">
+                {availableDates.map((date) => (
+                  <option key={date} value={date} />
+                ))}
+              </datalist>
+            </div>
+          </div>
+        </div>
+
+        {/* Loading e Error States */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex items-center space-x-3 bg-white/80 backdrop-blur-sm rounded-xl px-6 py-4 shadow-lg">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+              <p className="text-gray-700 font-medium text-lg">
+                Caricamento in corso...
+              </p>
+            </div>
+          </div>
         )}
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+            <div className="flex items-center space-x-3">
+              <svg
+                className="h-5 w-5 text-red-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                />
+              </svg>
+              <p className="text-red-700 font-medium">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Content Area */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl border border-white/30 overflow-hidden">
+          <div className="p-6">
+            <div className="space-y-6 overflow-y-auto max-h-[600px] pr-2 custom-scrollbar">
+              {leagues.length > 0 ? (
+                leagues
+                  .filter((league) => {
+                    if (selectedCountryId === 0) {
+                      // Se siamo in "All", mostra solo leghe con almeno un match
+                      return matches.some(
+                        (m) => m.league?.leagueId === league.leagueId
+                      );
+                    }
+                    // Se siamo in un paese specifico, mostra tutte le leghe
+                    return true;
+                  })
+                  .map((league) => {
+                    const matchesOfThisLeague = matches.filter(
+                      (m) => m.league?.leagueId === league.leagueId
+                    );
+
+                    return (
+                      <div
+                        key={league.leagueId}
+                        className="transform transition-all duration-300 hover:scale-[1.02]"
+                      >
+                        <LeagueAccordion
+                          league={league}
+                          matches={matchesOfThisLeague}
+                          onLeagueClick={() =>
+                            openLeagueDetails(league.leagueId)
+                          }
+                        />
+                      </div>
+                    );
+                  })
+              ) : (
+                <div className="text-center py-16">
+                  <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <svg
+                      className="h-12 w-12 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                      />
+                    </svg>
+                  </div>
+                  <p className="text-gray-500 text-lg font-medium">
+                    Nessuna lega disponibile per questa data
+                  </p>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Prova a selezionare una data diversa
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Add League Button */}
+          {selectedCountryId !== 0 && (
+            <div className="border-t border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50 p-6">
+              <button
+                onClick={openAddLeagueModal}
+                className="w-full group relative overflow-hidden bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-green-700 to-emerald-700 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                <div className="relative flex items-center justify-center space-x-2">
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
+                  </svg>
+                  <span>Aggiungi Lega</span>
+                </div>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Custom Scrollbar Styles */}
+        <style jsx>{`
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+          }
+        `}</style>
       </div>
 
-      {selectedCountryId !== 0 && (
-        <button
-          onClick={openAddLeagueModal}
-          className="w-full py-2 mt-4 bg-green-600 text-white rounded hover:bg-green-700"
-        >
-          + Aggiungi Lega
-        </button>
-      )}
-
+      {/* Modals */}
       <AddLeagueModal
         isOpen={isAddLeagueOpen}
         onClose={() => setIsAddLeagueOpen(false)}
@@ -302,6 +441,6 @@ export default function HomePage() {
         league={editLeague}
         onLeagueUpdated={handleLeagueUpdated}
       />
-    </>
+    </div>
   );
 }
